@@ -27,8 +27,3 @@ const Player = (name, marker) => {
 
 const playerOne = Player("Etereke", 'X');
 const playerTwo = Player("Süti", 'O');
-
-console.log(playerOne.getName());
-console.log(playerOne.getMarker());
-console.log(playerTwo.getName());
-console.log(playerTwo.getMarker());
