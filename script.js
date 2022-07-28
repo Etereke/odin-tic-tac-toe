@@ -1,10 +1,34 @@
+//Module for anything display-related
 const GameBoard = (() => {
+    
     const gameboard = document.querySelector('.game-board');
     let gameboardCells = [];
     let players = [];
-    // for(let i = 1; i <= 9; i++){
-    //     gameboardCells.push(document.querySelector(`.cell-${i}`));
-    // }
+
+    
+    //Private functions
+    const handleClick = (e) => {
+        const currentCellIndex = e.target.dataset.index;
+        GameLogic.AddMark(currentCellIndex);
+        GameBoard.Render();
+    }
+
+    const InitializeEventHandlers = () => {
+        gameboardCells.forEach(cell => {
+            cell.addEventListener('click', handleClick);
+        });
+    }
+
+    const RemoveEventHandlers = () => {
+        gameboardCells.forEach(cell => {
+            cell.removeEventListener('click', handleClick);
+        });
+    }
+
+
+    //Public functions
+    const SetPlayers = (playerList) => players = playerList;
+
     const InitializeGameboard = () => {
         gameboardCells = [];
         gameboard.innerHTML = '';
@@ -16,22 +40,6 @@ const GameBoard = (() => {
             gameboardCells.push(cell);
         }
         InitializeEventHandlers();
-    }
-    const SetPlayers = (playerList) => players = playerList;
-    const handleClick = (e) => {
-        const currentCellIndex = e.target.dataset.index;
-        GameLogic.AddMark(currentCellIndex);
-        GameBoard.Render();
-    }
-    const InitializeEventHandlers = () => {
-        gameboardCells.forEach(cell => {
-            cell.addEventListener('click', handleClick);
-        });
-    }
-    const RemoveEventHandlers = () => {
-        gameboardCells.forEach(cell => {
-            cell.removeEventListener('click', handleClick);
-        });
     }
 
     const FinishGame = (indices, name) => {
@@ -63,13 +71,18 @@ const GameBoard = (() => {
         }
     };
     return {
-        Render,
-        InitializeGameboard,
         SetPlayers,
-        FinishGame
+        InitializeGameboard,
+        FinishGame,
+        Render
     };
 })();
+
+
+//Module for anything game-logic related
 const GameLogic = (() => {
+
+    //Which line combinations need to be checked for a win
     const CHECK_INDICES_ARRAY = [[0, 1, 2], [3, 4, 5], [6, 7, 8], 
                                  [0, 3, 6], [1, 4, 7], [2, 5, 8],
                                  [0, 4, 8], [2, 4, 6]];
@@ -77,18 +90,21 @@ const GameLogic = (() => {
     let  players = [];
     let gameboard = ['', '', '', '', '', '', '', '', ''];
 
+
+
+    //Private functions
     const SetPlayers = (player1, player2) => {
         players = [player1, player2];
     }
+
     const SendPlayers = () => GameBoard.SetPlayers(players);
+
     const SwitchPlayer = () => {
         firstIsCurrentPlayer = !firstIsCurrentPlayer;
         statusDiv.textContent = firstIsCurrentPlayer ? `${players[0].getName()}'s turn` : `${players[1].getName()}'s turn`;
     }
-    const GetCell = (index) => {
-        return gameboard[index];
-    }
 
+    //Returns true if a given line combination contains the same marker in every cell
     const CheckOneRow = (indices) => {
         if(gameboard[indices[0]] === '' || gameboard[indices[1]] === '' || gameboard[indices[2]] === ''){
             return false;
@@ -99,30 +115,39 @@ const GameLogic = (() => {
         else return false;
     }
 
+    //Returns true if the game ended and calls GameBoard's FinishGame function with appropriate parameters
+    //Returns false if the game has not been decided
     const CheckGameEnd = () => {
         for(let indices of CHECK_INDICES_ARRAY){
             if(CheckOneRow(indices)){
                 if(gameboard[indices[0]] === players[0].getMarker()) {
                     GameBoard.FinishGame(indices, players[0].getName());
-                    return 1; 
+                    return true; 
                 }
                 else{
                     GameBoard.FinishGame(indices, players[1].getName());
-                    return 2; 
+                    return true; 
                 }
             }
         }
         for(let cell of gameboard){
-            if(cell === '') return 0;
+            if(cell === '') return false;
         }
         GameBoard.FinishGame(null);
-        return 3;
+        return true;
+    }
+
+
+
+    //Public functions
+    const GetCell = (index) => {
+        return gameboard[index];
     }
 
     const AddMark = (index) => {
         if(gameboard[index] === ''){
             gameboard[index] = firstIsCurrentPlayer ? players[0].getMarker() : players[1].getMarker();
-            if(CheckGameEnd() === 0) SwitchPlayer();
+            if(!CheckGameEnd()) SwitchPlayer();
         }
     }
 
@@ -141,6 +166,9 @@ const GameLogic = (() => {
     };
 })();
 
+
+
+//Basically just a container for player data
 const Player = (name, marker, color) => {
     const getName = () => name;
     const getMarker = () => marker;
@@ -152,9 +180,12 @@ const Player = (name, marker, color) => {
     };
 };
 
+
+
 const statusDiv = document.querySelector('.game-info');
 statusDiv.textContent = 'Welcome to Tic Tac Toe! Please enter your names!';
 const startBtn = document.querySelector('.startBtn');
+
 startBtn.addEventListener('click', (e) => {
     const p1 = document.querySelector('#p-1');
     const p2 = document.querySelector('#p-2');
