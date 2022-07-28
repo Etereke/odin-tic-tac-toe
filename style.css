@@ -1,6 +1,7 @@
 body{
     margin: 0;
     padding: 0;
+    background-color: lightsteelblue;
 }
 
 .container{
@@ -27,4 +28,23 @@ body{
     border: 5px solid black;
     font-size: 70px;
     cursor: pointer;
+}
+
+.input{
+    display: grid;
+    grid-template-columns: 1fr;
+    color: rgb(87, 87, 87);
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.startBtn{
+    padding: 10px 15px;
+    border: none;
+    background-color: rgb(57, 57, 199);
+    color: white;
+    border-radius: 15px;
+}
+.startBtn:disabled{
+    background-color: rgb(109, 109, 179);
 }
