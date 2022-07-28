@@ -7,6 +7,7 @@ const GameBoard = (() => {
     // }
     const InitializeGameboard = () => {
         gameboardCells = [];
+        gameboard.innerHTML = '';
         for(let i = 0; i < 9; i++){
             let cell = document.createElement('div');
             cell.classList.add('cell');
@@ -33,13 +34,18 @@ const GameBoard = (() => {
         });
     }
 
-    const FinishGame = (indices) => {
+    const FinishGame = (indices, name) => {
         RemoveEventHandlers();
         if(indices !== null){
+            statusDiv.textContent = `${name} won! Congratulations!`
             for(let i of indices){
                 gameboardCells[i].style.backgroundColor = 'green';
             }
         }
+        else{
+            statusDiv.textContent = "It's a tie!";
+        }
+        startBtn.disabled = false;
     }
 
     const Render = () => {
@@ -75,7 +81,10 @@ const GameLogic = (() => {
         players = [player1, player2];
     }
     const SendPlayers = () => GameBoard.SetPlayers(players);
-    const SwitchPlayer = () => firstIsCurrentPlayer = !firstIsCurrentPlayer;
+    const SwitchPlayer = () => {
+        firstIsCurrentPlayer = !firstIsCurrentPlayer;
+        statusDiv.textContent = firstIsCurrentPlayer ? `${players[0].getName()}'s turn` : `${players[1].getName()}'s turn`;
+    }
     const GetCell = (index) => {
         return gameboard[index];
     }
@@ -94,11 +103,11 @@ const GameLogic = (() => {
         for(let indices of CHECK_INDICES_ARRAY){
             if(CheckOneRow(indices)){
                 if(gameboard[indices[0]] === players[0].getMarker()) {
-                    GameBoard.FinishGame(indices);
+                    GameBoard.FinishGame(indices, players[0].getName());
                     return 1; 
                 }
                 else{
-                    GameBoard.FinishGame(indices);
+                    GameBoard.FinishGame(indices, players[1].getName());
                     return 2; 
                 }
             }
@@ -113,23 +122,7 @@ const GameLogic = (() => {
     const AddMark = (index) => {
         if(gameboard[index] === ''){
             gameboard[index] = firstIsCurrentPlayer ? players[0].getMarker() : players[1].getMarker();
-            let gameState = CheckGameEnd();
-            if(gameState !== 0){
-                switch(gameState){
-                    case 1:
-                        console.log('Player 1 wins!');
-                        break;
-                    case 2:
-                        console.log('Player 2 wins!');
-                        break;
-                    case 3:
-                        console.log("It's a tie!");
-                        break;
-                    default:
-                        console.log('Something went wrong!');
-                }
-            }
-            else SwitchPlayer();
+            if(CheckGameEnd() === 0) SwitchPlayer();
         }
     }
 
@@ -159,7 +152,18 @@ const Player = (name, marker, color) => {
     };
 };
 
-const playerOne = Player("Etereke", 'X', 'blue');
-const playerTwo = Player("Süti", 'O', 'red');
-
-GameLogic.StartGame(playerOne, playerTwo);
+const statusDiv = document.querySelector('.game-info');
+statusDiv.textContent = 'Welcome to Tic Tac Toe! Please enter your names!';
+const startBtn = document.querySelector('.startBtn');
+startBtn.addEventListener('click', (e) => {
+    const p1 = document.querySelector('#p-1');
+    const p2 = document.querySelector('#p-2');
+    if(p1.value && p2.value){
+        GameLogic.StartGame(Player(p1.value, 'X', 'blue'), Player(p2.value, 'O', 'red'));
+        e.target.disabled = true;
+        statusDiv.textContent = `${p1.value}'s turn`;
+    }
+    else{
+        statusDiv.textContent = 'Enter both names before you start the game!';
+    }
+});
