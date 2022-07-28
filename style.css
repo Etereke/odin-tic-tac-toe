@@ -1,0 +1,26 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.container{
+    display: grid;
+    grid-template-columns: auto;
+    justify-content: center;
+    text-align: center;
+}
+
+.game-board{
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    border: 5px solid black;
+}
+
+.cell{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid black;
+    font-size: 70px;
+}
